@@ -8,8 +8,11 @@
 library(R2jags)
 library(R2WinBUGS)
 
-# load dataset
+# load datasets
 fire_dataset <- read.csv("data/fires_sonoran_meters.csv", header=TRUE, stringsAsFactors = FALSE)
+ElNinoLanina <- read.csv("data/ElNinoLanina.csv", header=TRUE, stringsAsFactors = FALSE)
+
+nino_index <- ElNinoLanina$NOAA_.1isLa[9:109]
 
 # fire frequency
 by_year_fun <- function(x) {length(which(fire_dataset$FIRE_YEAR==x))}
@@ -43,12 +46,13 @@ FIRE <- function(){
   int ~ dnorm(0, 0.01)
   # northeast trend
   B ~ dnorm(0, 0.01)
+  B2 ~ dnorm(0, 0.01)
   
   #sd_freq ~ dunif(0, 100)
   #tau_freq <- 1/(sd_freq*sd_freq)
   
   for(t in 1:TT){
-    log(lambda[t]) <- int + B*t
+    log(lambda[t]) <- int + B*t + B2*nino_index[t]
     fires_per_year[t] ~ dpois(lambda[t])
   }
 }
@@ -57,8 +61,8 @@ if (is.R()){
   filename <- file.path(tempdir(), "FIRE.bug")}
 write.model(FIRE, filename)
 inits <- list(list(int=1, B=0))
-data <- list("fires_per_year", "TT")
-parameters <- c("int", "B", "lambda")
+data <- list("fires_per_year", "TT", "nino_index")
+parameters <- c("int", "B", "lambda", "B2")
 FIRE <- jags(data=data, inits=inits, parameters.to.save=parameters, filename,
              n.chains=1, n.burnin=50000, n.iter=100000, n.thin=1, DIC=TRUE)
 
