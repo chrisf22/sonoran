@@ -1,1 +1,3 @@
 This repository is for developing trend models to quantify potential tipping points in the frequency and size of fires in the Sonoran Desert. These models must be able to successfully describe the tails of distributions (i.e. extreme fires) to enable quantifying trends in the variation in addition to the mean of variables related to fire. The ultimate goal is to disseminate the results of these models via an interactive visualization tool. 
+
+The current script, 'sonoran_trend_model.R', contains a preliminary trend model that models fire as a mixture of the probabilty of fire and the size of fire given that there was one. 
